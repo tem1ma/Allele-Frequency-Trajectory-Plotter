@@ -3,7 +3,7 @@
 This function takes raw data ancient human remain samples and outputs a plot of minor allele frequencies over time. 
 It runs from the command line "sh alleleFreqPlotter.sh -f v44.3_1240K_public -r region -g gene -t Homo_sapiens.GRCh37.87.gtf"
 
-3 or 4 arguments are required: 
+3 or 4 arguments are required:\n 
 -f: a .anno file
 -r: a region to search for (currently supports EAST_ASIA, SOUTHEAST_ASIA, SOUTH_ASIA, ASIA, EUROPE, WESTERN_EUROPE, EASTERN_EUROPE)
 
