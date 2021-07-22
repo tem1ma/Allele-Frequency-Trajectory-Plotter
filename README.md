@@ -15,9 +15,9 @@ It runs from the command line "sh alleleFreqPlotter.sh -f v44.3_1240K_public -r 
 
 Files and programs required:
 > alleleFreqPlotter.sh 
-	> v44.3_1240K_public.fam
-	> v44.3_1240K_public. anno
-	> alleleFunction.R
-	> PLINK
-	> allelePlotter.R
-	> Homo_sapiens.GRCh37.87.gtf
+> v44.3_1240K_public.fam
+> v44.3_1240K_public. anno
+> alleleFunction.R
+> PLINK
+> allelePlotter.R
+> Homo_sapiens.GRCh37.87.gtf
