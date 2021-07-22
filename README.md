@@ -1,32 +1,36 @@
 # Allele-Frequency-Trajectory-Plotter
 
-This tool is designed to work with ancient genomic data archived in the [Allen Ancient DNA Resource](https://reich.hms.harvard.edu/allen-ancient-dna-resource-aadr-downloadable-genotypes-present-day-and-ancient-dna-data), which is maintained by Swapan Mallick and David Reich.
+This tool is designed to work with ancient genomic data archived in the [Allen Ancient DNA Resource](https://reich.hms.harvard.edu/allen-ancient-dna-resource-aadr-downloadable-genotypes-present-day-and-ancient-dna-data) (AADR), which is maintained by Swapan Mallick and David Reich.
 
-AlleleFreqPlotter.sh takes as input the genotype and metadata files from the database, and outputs a plot of minor allele frequencies over time for selected alleles from various geographic subdivisions.
+AlleleFreqPlotter.sh takes as input the genotype and metadata files from the AADR, and outputs a plot of minor allele frequencies over time for selected alleles from various geographic subdivisions.
 
-It runs from the command line 
+The tool is run from the command line and requires 3 or 4 arguments:
 
-"sh alleleFreqPlotter.sh -f v44.3_1240K_public -r region -g gene -t Homo_sapiens.GRCh37.87.gtf"
+**-f:** a *.anno* file
 
-3 or 4 arguments are required:
+**-r:** a region to filter for (currently supports *EAST_ASIA, SOUTHEAST_ASIA, SOUTH_ASIA, ASIA, EUROPE, WESTERN_EUROPE, EASTERN_EUROPE*)
 
--f: a .anno file
+**-s**: a SNP ID
+```
+sh alleleFreqPlotter.sh -f v44.3_1240K_public -r europe -s rs34536443
+```
 
--r: a region to search for (currently supports EAST_ASIA, SOUTHEAST_ASIA, SOUTH_ASIA, ASIA, EUROPE, WESTERN_EUROPE, EASTERN_EUROPE)
+or<br/>
+**-g**: a gene name; if this is provided, a **-t** flag must also be provided with a *.gtf* annotation file containing gene information  
+- Use if investigating multiple SNPs in a gene
 
-You can also provide the name of a gene of interest along with a gtf annotation file, if you are interested in plotting the frequencies of all alleles within and neighboring the gene. 
+```
+sh alleleFreqPlotter.sh -f v44.3_1240K_public -r europe -g TYK2 -t Homo_sapiens.GRCh37.87.gtf
+```
 
--g OR -s
--s: a SNP
--g: an entire gene (containing multiple SNPs); if this is provided, a -t argument must also be provided, which is a .gtf file containing gene information
 
 Files and programs required:<br/>
 >alleleFreqPlotter.sh<br/>
-a .fam file<br/>
-a .anno file<br/>
+a *.fam* file<br/>
+a *.anno* file<br/>
 alleleFunction.R<br/>
 PLINK<br/>
 allelePlotter.R<br/>
-a.gtf file<br/>
+a *.gtf* file<br/>
 
 
