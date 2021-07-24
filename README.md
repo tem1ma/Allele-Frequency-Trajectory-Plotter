@@ -2,7 +2,7 @@
 
 This tool is designed to work with ancient genomic data archived in the [Allen Ancient DNA Resource](https://reich.hms.harvard.edu/allen-ancient-dna-resource-aadr-downloadable-genotypes-present-day-and-ancient-dna-data) (AADR), which is maintained by Swapan Mallick and David Reich.
 
-AlleleFreqPlotter.sh takes as input the genotype and metadata files from the AADR, and outputs a plot of minor allele frequencies over time for selected alleles from various geographic subdivisions.
+AlleleFreqPlotter.sh takes as input the genotype and metadata files from the AADR, and outputs a plot of minor allele frequencies over 1000-year sliding windows over the last 10,000 years for selected alleles from various provided custom geographic subdivisions.
 
 The tool is run from the command line and requires 3 or 4 arguments:
 
