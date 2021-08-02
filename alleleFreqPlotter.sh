@@ -1,14 +1,15 @@
 #!/bin/bash
 
 #Must provide an input file prefix, a region, and a SNP or a gene+GTF file
+#Final argument, -m is if want to plot moderns in final output or not (so -m y or -m n for yes or no)
 
-#Ex:  sh alleleFreqPlotter.sh -f v44.3_1240K_public -r europe -g TYK2 -t Homo_sapiens.GRCh37.87.gtf
+#Ex:  sh alleleFreqPlotter.sh -f v44.3_1240K_public -r europe -g TYK2 -t Homo_sapiens.GRCh37.87.gtf -m y
 #Options for regions: east_asia, southeast_asia, south_asia, asia, europe, western_europe, eastern_europe
 
 #$FILE is a prefix (ex v44.3_1240K_public)
 #ex GTF file: Homo_sapiens.GRCh37.87.gtf
 
-while getopts f:r:s:g:t: option
+while getopts f:r:s:g:t:m: option
 do
 	case "${option}" in
 		f) FILE=${OPTARG};;
@@ -16,9 +17,20 @@ do
 		s) SNP=${OPTARG};;
 		g) GENE=${OPTARG};;
 		t) GTF=${OPTARG};;
+		m) MODERN=${OPTARG};;
 
 	esac
 done
+
+#if no -m argument was provided, default to including moderns
+if [ -n "$MODERN" ]
+then
+MODERN=$MODERN
+
+else
+MODERN="y"
+fi
+
 
 #make a copy of the .fam file for modifying
 cp $FILE.fam tempAFP.fam
@@ -48,7 +60,8 @@ plink --bfile $FILE --fam tempAFP.fam --keep list_$REGION.txt --snp $SNP --freq 
 ###PLOTTING####
 
 #plot the allele frequencies and output a pdf graph
-Rscript allelePlotter.R ${REGION}_${SNP}.frq.strat
+#second argument states whether to include moder samples in the final graph or not
+Rscript allelePlotter.R ${REGION}_${SNP}.frq.strat ${MODERN}
 
 mkdir output_${REGION}_${SNP}
 
@@ -89,7 +102,7 @@ plink --bfile $FILE --fam tempAFP.fam --keep list_$REGION.txt --extract list_fro
 ###PLOTTING###
 
 #STEP 5: plot the allele frequencies and output graphs into a single pdf file
-Rscript allelePlotter.R ${REGION}_${GENE}.frq.strat
+Rscript allelePlotter.R ${REGION}_${GENE}.frq.strat ${MODERN}
 
 
 mkdir output_${REGION}_${GENE}

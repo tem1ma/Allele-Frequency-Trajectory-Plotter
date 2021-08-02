@@ -6,7 +6,9 @@ library(dplyr)
 library(stringr)
 library(gridExtra)
 
-file_input = args[1] #"EAST_ASIA_LAMA1.frq.strat" # ex europe_TYK2.frq.strat" or "europe_rs34536443.frq.strat"
+
+file_input = args[1] # ex europe_TYK2.frq.strat" or "europe_rs34536443.frq.strat"
+incl_modern = tolower(args[2])  #y or n regarding whether modern samples should be output in the final plot
 
 #gene here is used to mean the gene, or the SNP if only 1 SNP was investigated
 #file input contains SNPs in $2--if just one SNP was input, this will be the same for the whole file
@@ -39,6 +41,14 @@ freqFile$CLST <- factor(freqFile$CLST, levels = c("Modern","(0,500]", "(500,1e+0
 #put the dataframe in order on the CLST column
 frq_mutated <- freqFile %>% dplyr::arrange(SNP,CLST)
 
+#extract all the rows containing modern samples
+#future code excludes them, so df_modern will be used to add them back at the end for plotting
+df_modern <- data.frame()
+for (i in 1:nrow(frq_mutated)){
+  if (frq_mutated$CLST[i] == "Modern"){
+    df_modern <- rbind(df_modern, frq_mutated[i,])
+  }}
+
 #divide the NCHROBS and MAC columns by 2 (except for the moderns)
 for (i in 1:nrow(frq_mutated)){
   if (frq_mutated$CLST[i] !="Modern"){
@@ -56,9 +66,6 @@ frq_mutated$CLST <- gsub("]","",frq_mutated$CLST, fixed = T)
 frq_mutated <- separate(frq_mutated, col = "CLST", into = c("from","to"), sep = ",")
 
 #adjust the Modern column to now be from 0 to 0
-
-
-
 frq_mutated$from[is.na(frq_mutated$from)] <- 0
 frq_mutated$to[is.na(frq_mutated$to)] <- 0
 
@@ -106,8 +113,8 @@ for (i in 1:length(list_by_snp) ){
     for (j in 1:(nrow(df) - 1) ){
         new_from <- c(new_from, df$from[j])  #keep "from" the same
         new_to <- c(new_to, df$to[j+1])      #adjust "to" to be the next row's "to"
-        new_mac <- c(new_mac, sum(df$MAC[j:j+1]))  #add the MAC's for two consecutive rows together and append to vector
-        new_nchrobs <- c(new_nchrobs, sum(df$NCHROBS[j:j+1]))  #do the same for NCHROBS
+        new_mac <- c(new_mac, sum(df$MAC[j:(j+1)]))  #add the MAC's for two consecutive rows together and append to vector
+        new_nchrobs <- c(new_nchrobs, sum(df$NCHROBS[j:(j+1)]))  #do the same for NCHROBS
     }
     #create a new dataframe with the sliding windows and new from, to, MAC, and NCHROBS
     df_new <- data.frame(SNP=df$SNP[1:19],new_from,new_to,new_mac,new_nchrobs)
@@ -158,6 +165,57 @@ for (i in 1:length(updated_list_by_snp)) {
   updated_list_by_snp[[i]]$SNP <- names(updated_list_by_snp)[i]
 }
 
+###############################
+#adding back the modern columns
+###############################
+
+#in the dataframe of moderns, add columns for upper and lower uncertainties
+m_lower_uncert <- c()
+m_upper_uncert <- c()
+
+#loop through each row and get the uncertainty values for each row
+#binom.approx outputs lower uncertainty in the 4th position and upper in the 5th
+for (i in 1:(nrow(df_modern)) ){
+  m_lower_uncert <- c(m_lower_uncert, binom.approx(df_modern$MAC[i], df_modern$NCHROBS[i], conf.level = 0.95)[,4])
+  m_upper_uncert <- c(m_upper_uncert, binom.approx(df_modern$MAC[i], df_modern$NCHROBS[i], conf.level = 0.95)[,5])
+}
+
+#add the uncertainties to df_modern
+df_modern <- df_modern %>% dplyr::mutate(lower.uncert = m_lower_uncert, upper.uncert = m_upper_uncert)
+df_modern$CLST <- as.character(df_modern$CLST)
+
+#create a new data frame with col names that match the ones in updated_list_by_snp
+#adjusted_mac & nchrobs are just the same as new_mac &nchrobs
+fixed_df_modern <- data_frame("SNP" = df_modern$SNP, "new_from" = df_modern$CLST, 
+                              "new_to" = df_modern$CLST, "new_mac" = df_modern$MAC,
+                              "new_nchrobs" = df_modern$NCHROBS, "adjusted_mac" = df_modern$MAC,
+                              "adjusted_nchrobs" = df_modern$NCHROBS, "new_maf" = df_modern$MAF,
+                              "Date.range" = df_modern$CLST, "lower.uncert" = df_modern$lower.uncert,
+                              "upper.uncert" = df_modern$upper.uncert)
+
+
+for (i in 1:nrow(fixed_df_modern)){
+  pulled_SNP <- fixed_df_modern$SNP[i]
+  updated_list_by_snp[[pulled_SNP]] <- rbind(updated_list_by_snp[[pulled_SNP]], fixed_df_modern[i,])
+  
+  #if moderns shouldn't be included in the final graph, exclude it from the list of factors
+  if (incl_modern=="n"){
+    updated_list_by_snp[[pulled_SNP]]$Date.range <- factor(updated_list_by_snp[[pulled_SNP]]$Date.range,
+                                                           levels = c("0-1000", "500-1500", "1000-2000", "1500-2500",
+                                                                      "2000-3000",  "2500-3500",  "3000-4000",  "3500-4500",
+                                                                      "4000-5000",  "4500-5500",  "5000-6000",  "5500-6500", "6000-7000",
+                                                                      "6500-7500", "7000-8000",  "7500-8500",  "8000-9000",
+                                                                      "8500-9500",  "9000-10000"))
+  }else{
+  updated_list_by_snp[[pulled_SNP]]$Date.range <- factor(updated_list_by_snp[[pulled_SNP]]$Date.range,
+                                                         levels = c("Modern", "0-1000", "500-1500", "1000-2000", "1500-2500",
+                                                            "2000-3000",  "2500-3500",  "3000-4000",  "3500-4500",
+                                                            "4000-5000",  "4500-5500",  "5000-6000",  "5500-6500", "6000-7000",
+                                                            "6500-7500", "7000-8000",  "7500-8500",  "8000-9000",
+                                                            "8500-9500",  "9000-10000"))
+}}
+  
+
 #output all the graphs into a single PDF
 pdf(paste0(region_gene_name,".pdf"), onefile = TRUE)
 
@@ -177,7 +235,15 @@ for (frame in updated_list_by_snp){
   #save the df used into a text file
   write.table(frame, file = paste0(output_name, ".txt"), quote = F, row.names =F, col.names = T, sep = "\t")
   
-  my_plot <- ggplot(frame, aes(x = Date.range, y = new_maf , group = SNP)) +
+  #if moderns should not be included in the final graph, remove them from the df
+  if (incl_modern=="n"){ 
+  new_frame <- frame[-20,]
+  }else{
+  new_frame <- frame
+  }
+ 
+
+  my_plot <- ggplot(new_frame, aes(x = Date.range, y = new_maf , group = SNP)) +
     geom_point() +
     geom_line() +
     geom_hline(yintercept = 0.1, lty = 5, col = "red") +
@@ -185,9 +251,9 @@ for (frame in updated_list_by_snp){
     ylab("Allele frequency") +
     ggtitle(output_name) + 
     geom_ribbon(aes(ymin = lower.uncert,  ymax = upper.uncert), alpha = 0.1) +
-    #label=paste0("n=",frame$new_nchrobs)
-    geom_text(label=frame$new_nchrobs, nudge_y = 0.025, check_overlap = F) +
-    scale_x_discrete(limits = rev(levels(frame$Date.range))) +
+    #label=paste0("n=",new_frame$new_nchrobs)
+    geom_text(label=new_frame$new_nchrobs, nudge_y = 0.010, check_overlap = F) +
+    scale_x_discrete(limits = rev(levels(new_frame$Date.range))) +
     theme(axis.text.x = element_text(angle = 45),
           panel.grid = element_blank(),
           axis.text.x.bottom = element_text(hjust = 1),

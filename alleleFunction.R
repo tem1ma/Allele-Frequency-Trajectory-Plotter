@@ -2,10 +2,10 @@ args = commandArgs(trailingOnly = TRUE)
 
 library(dplyr)
 
-file_input = args[1]    #"v44.3_1240K_public.anno"
-file_input_2 = args[2]  #tempAFP.fam
-region_input = tolower(args[3])  #"east_asia"
-file_output = args[4] # "list_east_asia.txt"
+file_input = args[1]    #ex "v44.3_1240K_public.anno"
+file_input_2 = args[2]  #ex "v44.3_1240K_public.fam"
+region_input = tolower(args[3])  #ex "europe"
+file_output = args[4] # ex "list_europe.txt"
 
 #read in the file
 anc_meta_raw <- read.delim(file_input, sep = "\t", header = T)
@@ -134,3 +134,4 @@ listIndex <- anc_region %>% dplyr::select(yearBins, Version.ID)
 
 #Write out into text files
 write.table(listIndex, file = file_output, quote= F, col.names = F, row.names = F, sep = "\t")
+
