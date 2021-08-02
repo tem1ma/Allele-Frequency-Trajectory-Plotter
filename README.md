@@ -22,6 +22,9 @@ or<br/>
 ```
 sh alleleFreqPlotter.sh -f v44.3_1240K_public -r europe -g TYK2 -t Homo_sapiens.GRCh37.87.gtf
 ```
+An optional **-m** argument may be provided indicating whether modern samples should be included in(```-m y```) or excluded from(```-m n```) the final output plot.
+If no -m argument is provided, the program defaults to including modern samples
+
 
 
 Files and programs required:<br/>
