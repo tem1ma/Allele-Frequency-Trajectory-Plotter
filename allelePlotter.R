@@ -214,7 +214,6 @@ for (i in 1:nrow(fixed_df_modern)){
                                                             "6500-7500", "7000-8000",  "7500-8500",  "8000-9000",
                                                             "8500-9500",  "9000-10000"))
 }}
-  
 
 #output all the graphs into a single PDF
 pdf(paste0(region_gene_name,".pdf"), onefile = TRUE)
@@ -233,7 +232,9 @@ for (frame in updated_list_by_snp){
   }
   
   #save the df used into a text file
-  write.table(frame, file = paste0(output_name, ".txt"), quote = F, row.names =F, col.names = T, sep = "\t")
+  #make sure it outputs in levels order
+  orderedFrame <- frame[order(frame$Date.range),]
+  write.table(orderedFrame, file = paste0(output_name, ".txt"), quote = F, row.names =F, col.names = T, sep = "\t")
   
   #if moderns should not be included in the final graph, remove them from the df
   if (incl_modern=="n"){ 
